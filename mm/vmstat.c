@@ -1257,8 +1257,12 @@ const char * const vmstat_text[] = {
 	"pgdeactivate",
 	"pglazyfree",
 
-	"pgfault",
-	"pgmajfault",
+        "pgfault",
+        "pgmajfault",
+        "pgfault_l4",
+        "pgfault_l3",
+        "pgfault_l2",
+        "pgfault_l1",
 	"pglazyfreed",
 
 	"pgrefill",
