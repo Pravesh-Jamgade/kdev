@@ -459,6 +459,7 @@ int __pte_alloc(struct mm_struct *mm, pmd_t *pmd)
 	if (likely(pmd_none(*pmd))) {	/* Has another populated it ? */
 		mm_inc_nr_ptes(mm);
 		pmd_populate(mm, pmd, new);
+		count_vm_event(PGFAULT_L1);
 		new = NULL;
 	}
 	spin_unlock(ptl);
@@ -4914,10 +4915,12 @@ int __p4d_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
 	smp_wmb(); /* See comment in __pte_alloc */
 
 	spin_lock(&mm->page_table_lock);
-	if (pgd_present(*pgd))		/* Another has populated it */
+	if (pgd_present(*pgd)) {		/* Another has populated it */
 		p4d_free(mm, new);
-	else
+	} else {
 		pgd_populate(mm, pgd, new);
+		count_vm_event(PGFAULT_L4);
+	}
 	spin_unlock(&mm->page_table_lock);
 	return 0;
 }
@@ -4940,6 +4943,7 @@ int __pud_alloc(struct mm_struct *mm, p4d_t *p4d, unsigned long address)
 	if (!p4d_present(*p4d)) {
 		mm_inc_nr_puds(mm);
 		p4d_populate(mm, p4d, new);
+		count_vm_event(PGFAULT_L3);
 	} else	/* Another has populated it */
 		pud_free(mm, new);
 	spin_unlock(&mm->page_table_lock);
@@ -4965,6 +4969,7 @@ int __pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long address)
 	if (!pud_present(*pud)) {
 		mm_inc_nr_pmds(mm);
 		pud_populate(mm, pud, new);
+		count_vm_event(PGFAULT_L2);
 	} else	/* Another has populated it */
 		pmd_free(mm, new);
 	spin_unlock(ptl);
